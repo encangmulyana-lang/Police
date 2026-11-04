@@ -31,7 +31,10 @@ footer{text-align:center;padding:22px 12px;border-top:1px solid #1b2f4d;color:#8
 <div class="marquee"><div>🚨 PROTECT THE METAVERSE ★ 888 OFFICERS ★ 0.0008 BNB ★ MINT NOW ★&nbsp;&nbsp;🚨 PROTECT THE METAVERSE ★ 888 OFFICERS ★ 0.0008 BNB ★ MINT NOW ★&nbsp;&nbsp;</div></div>
 <section id="mint" style="text-align:center"><h2>THE CALL OF DUTY</h2>
 <p><b>Minted:</b> 0 / 888 · <b>Price:</b> 0.0008 BNB each · <b>Max:</b> 11 per transaction</p>
-<p><button class="btn2" disabled>CONNECT WALLET (activates after deploy)</button> <button class="btn2" disabled>MINT NOW (activates after deploy)</button></p>
+<p><button class="btn2" disabled>CONNECT WALLET (activates after deploy)</button></p>
+<p><label class="muted">Qty: <input id="qtyInput" type="number" min="1" max="11" value="1" style="width:56px;padding:8px;border-radius:8px;border:1px solid #2a5ea8;background:#081223;color:#fff"></label> <button class="btn2" id="maxBtn" type="button">MAX</button> <button class="btn2" disabled>MINT NOW (activates after deploy)</button></p>
+<p id="mintMsg" class="muted"></p>
+<script>document.getElementById('maxBtn').addEventListener('click',()=>{document.getElementById('qtyInput').value=11;const m=document.getElementById('mintMsg');if(m)m.textContent='Qty set to MAX (11).';});</script>
 <p id="walletStatus" class="muted">Minting via the Binance Agentic Wallet (baw) is the primary route for this collection. On a phone, open this site inside a wallet app browser for the wallet button, or use the agent prompt below.</p>
 <div style="text-align:left"><p><b>Mint with your agent (baw) — primary route (after deploy):</b></p>
 <pre>Contract: TBD (Police / POLICE, ERC-721)
