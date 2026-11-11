@@ -39,6 +39,24 @@ footer{text-align:center;padding:22px 12px;border-top:1px solid #1b2f4d;color:#8
 const CONTRACT='0xE0b9cc9E8e6947d17dca487aFf58f850fCB0c007';
 const ABI=['function mint(uint256 quantity) payable'];
 let signer=null;
+const RPCS=["https://bsc-dataseed.bnbchain.org","https://bsc-dataseed1.binance.org","https://rpc-bsc.48.club"];
+const TX_WALLET_FEE="Your wallet could not prepare this transaction (empty answer from the browser). Open this site inside your wallet app browser (MetaMask / Trust Wallet / Binance Wallet) and try again.";
+async function rpcGasPrice(){
+  for(const url of RPCS){
+    try{ const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method:"eth_gasPrice",params:[]})});
+      const j=await r.json(); if(j.result) return BigInt(j.result); }catch(e){}
+  } return 1000000000n;
+}
+function txErrMsg(e){
+  const m=(e&&e.message)||String(e||"");
+  if(m.indexOf("invalid BigNumberish")>=0||m.indexOf("value=null")>=0){ return TX_WALLET_FEE; }
+  return (e&&e.reason)||m;
+}
+async function sendTx(tx,gasLimit){
+  const gp=await rpcGasPrice();
+  return signer.sendTransaction({...tx,gasPrice:gp,gasLimit:BigInt(gasLimit)});
+}
+
 document.getElementById('maxBtn').addEventListener('click',()=>{document.getElementById('qtyInput').value=11;const m=document.getElementById('mintMsg');if(m)m.textContent='Qty set to MAX (11).';});
 async function connectWallet(){
   const st=document.getElementById('walletStatus');
@@ -59,12 +77,12 @@ async function mintNft(){
   const qty=Math.min(11,Math.max(1,parseInt(document.getElementById('qtyInput').value)||1));
   try{
     msg.textContent='Sending mint transaction… confirm in your wallet.';
-    const c=new ethers.Contract(CONTRACT,ABI,signer);
-    const tx=await c.mint(qty,{value:ethers.parseEther((0.0008*qty).toFixed(6))});
+    const iface=new ethers.Interface(ABI);
+    const tx=await sendTx({to:CONTRACT,data:iface.encodeFunctionData('mint',[qty]),value:ethers.parseEther((0.0008*qty).toFixed(6))},300000);
     msg.textContent='Transaction sent: '+tx.hash+' — waiting for confirmation…';
     await tx.wait();
     msg.textContent='Mint confirmed! Transaction: '+tx.hash;
-  }catch(e){msg.textContent='Mint failed: '+(e.message||e);}
+  }catch(e){msg.textContent='Mint failed: '+txErrMsg(e);}
 }
 document.getElementById('connectBtn').addEventListener('click',connectWallet);
 document.getElementById('mintBtn').addEventListener('click',mintNft);
